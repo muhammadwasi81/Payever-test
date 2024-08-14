@@ -60,7 +60,7 @@ export class UserRepository implements IUserRepository {
   }
 
   private mapToEntity(document: UserDocument): UserEntity {
-    const { _id, name, email, age } = document;
-    return new UserEntity(name, email, age, _id.toString());
+    const { _id, firstName, lastName, email } = document;
+    return new UserEntity(firstName, lastName, email, _id.toString());
   }
 }

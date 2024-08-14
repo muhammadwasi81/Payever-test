@@ -8,6 +8,8 @@ import {
 } from '@nestjs/common';
 import mongoose from 'mongoose';
 import { User } from 'src/domain/user/user.entity';
+import { NodemailerService } from 'src/infrastructure/emaill/nodemailer.service';
+import { RabbitMQService } from 'src/infrastructure/messaging/rabbitmq.service';
 import { IUserRepository } from 'src/infrastructure/repository/interfaces/user.interface';
 
 @Injectable()
@@ -17,11 +19,30 @@ export class UserService {
   constructor(
     @Inject('IUserRepository')
     private userRepository: IUserRepository,
+    private readonly rabbitMQService: RabbitMQService,
+    private readonly nodemailerService: NodemailerService,
   ) {}
 
   async create(user: User): Promise<User> {
     try {
-      return await this.userRepository.create(user);
+      const createdUser = await this.userRepository.create(user);
+
+      await this.nodemailerService.sendDummyMail(
+        createdUser.email,
+        'Welcome to Our Platform',
+        `Hello ${createdUser.firstName} ${createdUser.lastName},\n\nWelcome to our platform! We're excited to have you on board.`,
+        `<h1>Welcome, ${createdUser.firstName} ${createdUser.lastName}!</h1><p>We're excited to have you on board.</p>`,
+      );
+
+      await this.rabbitMQService.sendMessage('user.created', {
+        id: createdUser.id,
+        firstName: createdUser.firstName,
+        lastName: createdUser.lastName,
+        email: createdUser.email,
+        avatar: createdUser.avatar,
+      });
+
+      return createdUser;
     } catch (error) {
       this.handleError(error, 'Error creating user');
     }
