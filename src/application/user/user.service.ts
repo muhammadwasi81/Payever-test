@@ -12,10 +12,10 @@ import * as fs from 'fs/promises';
 import mongoose from 'mongoose';
 import * as path from 'path';
 import { firstValueFrom } from 'rxjs';
-import { User } from 'src/domain/user/user.entity';
-import { NodemailerService } from 'src/infrastructure/emaill/nodemailer.service';
-import { RabbitMQService } from 'src/infrastructure/messaging/rabbitmq.service';
-import { IUserRepository } from 'src/infrastructure/repository/interfaces/user.interface';
+import { User } from '@/domain/user/user.entity';
+import { NodemailerService } from '@/infrastructure/emaill/nodemailer.service';
+import { RabbitMQService } from '@/infrastructure/messaging/rabbitmq.service';
+import { IUserRepository } from '@/infrastructure/repository/interfaces/user.interface';
 
 @Injectable()
 export class UserService {
