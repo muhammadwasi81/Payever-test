@@ -6,7 +6,7 @@ export class User {
   avatar?: string;
   avatarHash?: string;
   avatarBase64?: string;
-  externalId?: string;
+  userId?: string;
   constructor(
     id?: string,
     firstName?: string,
@@ -15,7 +15,7 @@ export class User {
     avatar?: string,
     avatarHash?: string,
     avatarBase64?: string,
-    externalId?: string,
+    userId?: string,
   ) {
     this.id = id;
     this.firstName = firstName;
@@ -24,6 +24,6 @@ export class User {
     this.avatar = avatar;
     this.avatarHash = avatarHash;
     this.avatarBase64 = avatarBase64;
-    this.externalId = externalId;
+    this.userId = userId;
   }
 }

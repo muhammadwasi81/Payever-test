@@ -10,4 +10,6 @@ export interface IUserRepository {
   updateAvatarHash(userId: string, hash: string): Promise<User>;
   findByExternalId(externalId: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
+  removeAvatar(userId: string): Promise<User>;
+  findByUserId(userId: string): Promise<User | null>;
 }

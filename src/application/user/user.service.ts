@@ -88,11 +88,14 @@ export class UserService {
         const userData = response.data.data;
 
         return new User(
-          id,
+          null,
           userData.first_name,
           userData.last_name,
           userData.email,
           userData.avatar,
+          null,
+          null,
+          userData.id,
         );
       } else {
         throw new NotFoundException(
@@ -130,7 +133,7 @@ export class UserService {
 
         if (existingUser) {
           user = await this.userRepository.update(existingUser.id, {
-            externalId: userId,
+            userId: userId,
             avatar: externalUser.avatar,
           });
         } else {
@@ -163,11 +166,34 @@ export class UserService {
         user = await this.userRepository.updateAvatar(user.id, hash, base64);
       }
 
-      return user.avatarBase64;
+      return `data:image/jpeg;base64,${user.avatarBase64}`;
     } catch (error) {
       this.handleError(
         error,
         `Error fetching avatar for user with id ${userId}`,
+      );
+    }
+  }
+
+  async deleteUserAvatar(userId: string): Promise<void> {
+    try {
+      const user = await this.userRepository.findByUserId(userId);
+      if (!user) {
+        throw new NotFoundException(`User with userId ${userId} not found`);
+      }
+
+      if (user.avatarHash) {
+        const filePath = path.join(this.avatarDir, `${user.avatarHash}.jpg`);
+        await fs.unlink(filePath).catch((err) => {
+          this.logger.warn(`Failed to delete avatar file: ${err.message}`);
+        });
+      }
+
+      await this.userRepository.removeAvatar(user.id);
+    } catch (error) {
+      this.handleError(
+        error,
+        `Error deleting avatar for user with userId ${userId}`,
       );
     }
   }

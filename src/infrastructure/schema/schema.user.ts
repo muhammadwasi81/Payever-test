@@ -24,6 +24,9 @@ export class User {
 
   @Prop()
   avatarBase64: string;
+
+  @Prop()
+  userId: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

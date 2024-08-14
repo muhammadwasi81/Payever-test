@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User as UserEntity } from 'src/domain/user/user.entity';
@@ -17,6 +17,7 @@ export class UserRepository implements IUserRepository {
       avatar: user.avatar,
       avatarHash: user.avatarHash,
       avatarBase64: user.avatarBase64,
+      userId: user.userId,
     });
     const savedUser = await createdUser.save();
     return this.mapToEntity(savedUser);
@@ -74,16 +75,25 @@ export class UserRepository implements IUserRepository {
     return this.mapToEntity(updatedUser);
   }
 
+  async findByUserId(userId: string): Promise<UserEntity | null> {
+    const user = await this.userModel.findOne({ userId }).exec();
+    return user ? this.mapToEntity(user) : null;
+  }
+
   async updateAvatarHash(userId: string, hash: string): Promise<UserEntity> {
-    const updatedUser = await this.userModel
-      .findByIdAndUpdate(userId, { avatarHash: hash }, { new: true })
-      .exec();
+    try {
+      const updatedUser = await this.userModel
+        .findByIdAndUpdate(userId, { avatarHash: hash }, { new: true })
+        .exec();
 
-    if (!updatedUser) {
-      throw new Error(`User with id ${userId} not found`);
+      if (!updatedUser) {
+        throw new Error(`User with id ${userId} not found`);
+      }
+
+      return this.mapToEntity(updatedUser);
+    } catch (error) {
+      throw error;
     }
-
-    return this.mapToEntity(updatedUser);
   }
 
   async delete(id: string): Promise<void> {
@@ -95,8 +105,12 @@ export class UserRepository implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
-    const user = await this.userModel.findOne({ email }).exec();
-    return user ? this.mapToEntity(user) : null;
+    try {
+      const user = await this.userModel.findOne({ email }).exec();
+      return user ? this.mapToEntity(user) : null;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findByExternalId(externalId: string): Promise<UserEntity | null> {
@@ -113,17 +127,26 @@ export class UserRepository implements IUserRepository {
       document.avatar || null,
       document.avatarHash || null,
       document.avatarBase64 || null,
+      document.userId || null,
     );
   }
+  async removeAvatar(userId: string): Promise<UserEntity> {
+    try {
+      const updatedUser = await this.userModel
+        .findByIdAndUpdate(
+          userId,
+          { $unset: { avatarHash: '', avatarBase64: '' } },
+          { new: true },
+        )
+        .exec();
 
-  private mapToSchema(entity: UserEntity): Partial<User> {
-    return {
-      firstName: entity.firstName,
-      lastName: entity.lastName,
-      email: entity.email,
-      avatar: entity.avatar || undefined,
-      avatarHash: entity.avatarHash || undefined,
-      avatarBase64: entity.avatarBase64 || undefined,
-    };
+      if (!updatedUser) {
+        throw new NotFoundException(`User with id ${userId} not found`);
+      }
+
+      return this.mapToEntity(updatedUser);
+    } catch (error) {
+      throw error;
+    }
   }
 }
