@@ -30,10 +30,10 @@ export class NodemailerService {
 
     try {
       const info = await this.transporter.sendMail(mailOptions);
-      console.log('Message sent: %s', info.messageId);
+      this.logger.log('Message sent: %s', info.messageId);
       return info;
     } catch (error) {
-      console.error('Error sending email:', error);
+      this.logger.error('Error sending email:', error);
       throw error;
     }
   }
