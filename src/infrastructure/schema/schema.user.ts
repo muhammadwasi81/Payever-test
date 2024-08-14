@@ -16,8 +16,14 @@ export class User {
   @Prop({ required: true, unique: true })
   email: string;
 
-  @Prop({ required: false })
-  avatar?: string;
+  @Prop()
+  avatar: string;
+
+  @Prop()
+  avatarHash: string;
+
+  @Prop()
+  avatarBase64: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

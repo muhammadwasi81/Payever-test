@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { HttpModule } from '@nestjs/axios';
 import mongodbConfig from './infrastructure/config/mongodb.config';
 import rabbitmqConfig from './infrastructure/config/rabbitmq.config';
 import nodemailerConfig from './infrastructure/config/nodemailer.config';
@@ -25,6 +26,7 @@ import { NodemailerService } from './infrastructure/emaill/nodemailer.service';
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     RabbitMQModule,
+    HttpModule,
   ],
   controllers: [UserController],
   providers: [
