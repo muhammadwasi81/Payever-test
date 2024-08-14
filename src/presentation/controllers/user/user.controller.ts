@@ -18,7 +18,7 @@ import {
   UpdateUserDto,
 } from '@/presentation/dtos/create-user.dto';
 
-@Controller('api/users')
+@Controller('api/v1/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

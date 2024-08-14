@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
+  HttpException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -221,25 +222,19 @@ export class UserService {
   private handleError(error: any, message: string): never {
     this.logger.error(`${message}: ${error.message}`, error.stack);
 
-    if (
-      error instanceof NotFoundException ||
-      error instanceof BadRequestException ||
-      error instanceof InternalServerErrorException
-    ) {
+    if (error instanceof HttpException) {
       throw error;
     }
 
-    if (error.response && error.response.status === 404) {
-      throw new NotFoundException('User not found');
+    if (error instanceof mongoose.Error.ValidationError) {
+      throw new BadRequestException(this.formatValidationError(error));
     }
 
     throw new InternalServerErrorException('An unexpected error occurred');
   }
 
   private formatValidationError(error: mongoose.Error.ValidationError): string {
-    const errors = Object.values(error.errors).map(
-      (err) => err.message as string,
-    );
-    return `Validation failed: ${errors.join(', ')}`;
+    const errors = Object.values(error.errors).map((err) => err.message);
+    return errors.join(', ');
   }
 }
